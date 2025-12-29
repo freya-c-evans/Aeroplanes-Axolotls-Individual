@@ -1,0 +1,49 @@
+clear; clc; close all;
+
+function dXdt = glider_energy(t, X, D)
+    % Extract variables from state vector X
+    theta = X(1); % Angle
+    s = X(2); % Speed
+    y = X(3); % Height
+
+    dtheta = (s^2 -cos(theta))/s; % Equation for dtheta\dt
+    ds = -sin(theta) - D*s^2; % Equation for ds\dt
+    dy = s*sin(theta); % Equation for dy\dt
+
+    dXdt = [dtheta; ds; dy];
+end 
+
+% Parameters
+D_values = [0, 1, 2, 3, 4];
+tspan = [0 20];
+
+% Initial conditions for the state vector X
+X0 = [pi/4; 1; 0]; % Initial values for theta, s and y
+
+% Create figure
+figure;
+hold on;
+
+% Loop over drag values 
+for i = 1:length(D_values)
+    D = D_values(i);
+
+    % Solve the differential equations using ode45
+    [t, X] = ode45(@(t, X) glider_energy(t, X, D), tspan, X0);
+
+    % Extract speed and height
+    s = X(:,2);
+    y = X(:,3);
+
+    % Compute energy 
+    E = 0.5*s.^2 + y;
+
+    % Plot energy against time
+    plot(t, E, 'LineWidth', 2, 'DisplayName', ['$D = ', num2str(D), '$']);
+end 
+
+set(gca, 'FontSize', 20);
+xlabel('Time $t$', 'Interpreter', 'latex');
+ylabel('Energy $E(t)$', 'Interpreter', 'latex');
+legend('Location', 'best', 'Interpreter', 'latex');
+grid on;
