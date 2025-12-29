@@ -1,0 +1,51 @@
+clear; clc; close all;
+
+function dXdt = glider_energy(t, X, D)
+    % Extract variables from state vector X
+    theta = X(1); % Angle
+    s = X(2); % Speed
+    y = X(3); % Height
+
+    dtheta = (s^2 -cos(theta))/s; % Equation for dtheta\dt
+    ds = -sin(theta) - D*s^2; % Equation for ds\dt
+    dy = s*sin(theta); % Equation for dy\dt
+
+    dXdt = [dtheta; ds; dy];
+end 
+
+% Parameters
+D = 0;
+tspan = [0 20];
+
+% Initial conditions for the state vector X
+X0 = [pi/4; 1; 0]; % Initial values for theta, s and y
+
+% Solve the differential equations using ode45
+[t, X] = ode45(@(t, X) glider_energy(t, X, D), tspan, X0);
+
+% Extract angle and speed
+theta = X(:, 1);
+s = X(:, 2);
+
+% Create grid for energy contours 
+theta_vals = linspace(-pi, pi, 400);
+s_vals = linspace(-2, 2, 400);
+
+[Theta, S] = meshgrid(theta_vals, s_vals);
+
+% Energy function (with y = 0);
+E = 0.5*S.^2;
+
+% Plot energy contours 
+figure;
+contour(Theta, S, E, 20, 'LineWidth', 1);
+hold on;
+
+% Plot trajectory
+plot(theta, s, 'k', 'LineWidth', 2);
+
+xlabel('$\theta$', 'Interpreter', 'latex');
+ylabel('$s$', 'Interpreter', 'latex');
+grid on;
+xlim([-pi pi]);
+ylim([ -2 2]);
