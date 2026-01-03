@@ -1,18 +1,5 @@
 clear; clc; close all;
 
-function dXdt = glider_energy(t, X, D)
-    % Extract variables from state vector X
-    theta = X(1); % Angle
-    s = X(2); % Speed
-    y = X(3); % Height
-
-    dtheta = (s^2 -cos(theta))/s; % Equation for dtheta\dt
-    ds = -sin(theta) - D*s^2; % Equation for ds\dt
-    dy = s*sin(theta); % Equation for dy\dt
-
-    dXdt = [dtheta; ds; dy];
-end 
-
 % Parameters
 D_values = [0, 1, 2, 3, 4];
 tspan = [0 20];
@@ -44,6 +31,24 @@ end
 
 set(gca, 'FontSize', 20);
 xlabel('Time $t$', 'Interpreter', 'latex');
-ylabel('Energy $E(t)$', 'Interpreter', 'latex');
+ylabel('Total Mechanical Energy $E(t)$', 'Interpreter', 'latex');
 legend('Location', 'best', 'Interpreter', 'latex');
 grid on;
+
+function dXdt = glider_energy(t, X, D)
+    % Extract variables from state vector X
+    theta = X(1); % Angle
+    s = X(2); % Speed
+    y = X(3); % Height
+    
+    if s < 1e-6
+        dtheta = 0; % Prevent division by zero for very small speeds
+    else
+        dtheta = (s^2 -cos(theta))/s; % Equation for dtheta\dt
+    end 
+    
+    ds = -sin(theta) - D*s^2; % Equation for ds\dt
+    dy = s*sin(theta); % Equation for dy\dt
+
+    dXdt = [dtheta; ds; dy];
+end 
