@@ -1,0 +1,54 @@
+clear; clc; close all;
+
+% Parameters
+D = 2;
+tspan = [0 20];
+
+% Initial conditions for the state vector X
+X0 = [pi/4; 1; 0]; % Initial values for theta, s and y
+
+% Solve the differential equations using ode45
+[t, X] = ode45(@(t, X) glider_energy(t, X, D), tspan, X0);
+
+% Extract speed and height
+s = X(:,2);
+y = X(:,3);
+
+% Compute energy 
+E = 0.5*s.^2 + y;
+
+% Numerical time derivative of energy
+dEdt_numerical = gradient(E, t);
+
+% Analytical expression for time derivative of energy
+dEdt_theory = -D*s.^3;
+
+% Plot comparison
+figure;
+plot(t, dEdt_numerical, 'LineWidth', 4);
+hold on;
+plot(t, dEdt_theory, '--', 'LineWidth', 4);
+
+set(gca, 'FontSize', 20);
+xlabel('Time $t$', 'Interpreter', 'latex');
+ylabel('Rate of Change of Energy $\frac{dE}{dt}$', 'Interpreter', 'latex');
+legend({'Numerical $\frac{dE}{dt}$', 'Theoretical $\frac{dE}{dt}$'}, 'Interpreter', 'latex', 'Location', 'best');
+grid on;
+
+function dXdt = glider_energy(t, X, D)
+    % Extract variables from state vector X
+    theta = X(1); % Angle
+    s = X(2); % Speed
+    y = X(3); % Height
+    
+    if s < 1e-6
+        dtheta = 0; % Prevent division by zero for very small speeds
+    else
+        dtheta = (s^2 -cos(theta))/s; % Equation for dtheta\dt
+    end 
+    
+    ds = -sin(theta) - D*s^2; % Equation for ds\dt
+    dy = s*sin(theta); % Equation for dy\dt
+
+    dXdt = [dtheta; ds; dy];
+end 
